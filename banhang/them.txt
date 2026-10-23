@@ -1,0 +1,67 @@
+
+<?php
+include "db.php";
+
+$thongbao = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $ten = trim($_POST["TenSP"]);
+    $gia = $_POST["Gia"];
+    $soluong = $_POST["SoLuong"];
+    $mota = trim($_POST["MoTa"]);
+
+    if ($ten != "" && is_numeric($gia) && $gia >= 0
+        && filter_var($soluong, FILTER_VALIDATE_INT) !== false
+        && $soluong >= 0) {
+
+        $sql = "INSERT INTO SanPham (TenSP, Gia, SoLuong, MoTa)
+                VALUES (?, ?, ?, ?)";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sdis", $ten, $gia, $soluong, $mota);
+
+        if ($stmt->execute()) {
+            header("Location: index.php");
+            exit;
+        } else {
+            $thongbao = "Không thể thêm sản phẩm.";
+        }
+    } else {
+        $thongbao = "Vui lòng nhập thông tin hợp lệ.";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm sản phẩm</title>
+</head>
+<body>
+    <h1>Thêm sản phẩm mới</h1>
+
+    <p style="color:red">
+        <?php echo htmlspecialchars($thongbao); ?>
+    </p>
+
+    <form method="POST">
+        <p>Tên sản phẩm:</p>
+        <input type="text" name="TenSP" required>
+
+        <p>Giá:</p>
+        <input type="number" name="Gia" min="0" step="0.01" required>
+
+        <p>Số lượng:</p>
+        <input type="number" name="SoLuong" min="0" step="1" required>
+
+        <p>Mô tả:</p>
+        <textarea name="MoTa"></textarea>
+
+        <br><br>
+        <button type="submit">Thêm sản phẩm</button>
+    </form>
+
+    <p><a href="index.php">Quay lại trang chủ</a></p>
+</body>
+</html>
